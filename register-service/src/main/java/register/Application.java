@@ -24,8 +24,8 @@ public class Application {
         return args -> {
             tokenRepository.deleteAll();
 
-            Arrays.asList("mstine", "jlong").forEach(n ->
-                    tokenRepository.save(new Token(n)));
+            /*Arrays.asList("user1", "user2").forEach(n ->
+                    tokenRepository.save(new Token(n)));*/
         };
     }
 }

@@ -1,4 +1,4 @@
-package passport;
+package push;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,14 +56,14 @@ class RestTemplateExample implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
         // use the "smart" Eureka-aware RestTemplate
-        ResponseEntity<List<Bookmark>> exchange =
+        ResponseEntity<List<Token>> exchange =
                 this.restTemplate.exchange(
-                        "http://bookmark-service/{userId}/register",
+                        "http://register-service/{userId}/tokens",
                         HttpMethod.GET,
                         null,
-                        new ParameterizedTypeReference<List<Bookmark>>() {
+                        new ParameterizedTypeReference<List<Token>>() {
                         },
-                        (Object) "mstine");
+                        (Object) "user1");
 
         exchange.getBody().forEach(System.out::println);
     }
@@ -74,53 +74,35 @@ class RestTemplateExample implements CommandLineRunner {
 class FeignExample implements CommandLineRunner {
 
     @Autowired
-    private BookmarkClient bookmarkClient;
+    private PushClient pushClient;
 
     @Override
     public void run(String... strings) throws Exception {
-        this.bookmarkClient.getBookmarks("jlong").forEach(System.out::println);
+        this.pushClient.getTokens("user1").forEach(System.out::println);
     }
 }
 
-@FeignClient("bookmark-service")
-interface BookmarkClient {
+@FeignClient("register-service")
+interface PushClient {
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{userId}/bookmarks")
-    List<Bookmark> getBookmarks(@PathVariable("userId") String userId);
+    @RequestMapping(method = RequestMethod.GET, value = "/{userId}/tokens")
+    List<Token> getTokens(@PathVariable("userId") String userId);
 }
 
-class Bookmark {
+class Token {
     private Long id;
-    private String href, label, description, userId;
+    private String userId;
 
     @Override
     public String toString() {
-        return "Bookmark{" +
-                "id=" + id +
-                ", href='" + href + '\'' +
-                ", label='" + label + '\'' +
-                ", description='" + description + '\'' +
-                ", userId='" + userId + '\'' +
-                '}';
+        return "Token { " + "id=" + id + ", userId='" + userId + '\'' + " }";
     }
 
-    public Bookmark() {
+    public Token() {
     }
 
     public Long getId() {
         return id;
-    }
-
-    public String getHref() {
-        return href;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public String getUserId() {

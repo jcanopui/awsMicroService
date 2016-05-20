@@ -1,11 +1,11 @@
 ---
 applications:
-- name: passport-service
+- name: push-service
   memory: 512M
   instances: 1
-  host: passport-service-${random-word}
+  host: push-service-${random-word}
   domain: cfapps.io
-  path: target/passport-service.jar
+  path: target/push-service.jar
   services:
       - eureka-service
   env:

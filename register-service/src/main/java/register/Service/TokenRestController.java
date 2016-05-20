@@ -24,8 +24,7 @@ class TokenRestController {
     Collection<Token> getTokens(@PathVariable String userId) {
         //return this.tokenRepository.findByUserId(userId);
         List<Token> userTokens = new ArrayList<Token>();
-        userTokens.add(new Token("user1"));
-        userTokens.add(new Token("user2"));
+        userTokens.add(new Token("user1", 123456789));
         return userTokens;
     }
 
@@ -33,7 +32,7 @@ class TokenRestController {
     Token getToken(@PathVariable String userId,
                    @PathVariable Long tokenId) {
         //return this.tokenRepository.findByUserIdAndId(userId, tokenId);
-        return new Token("user3");
+        return new Token("user2", 987654321);
     }
 
     /*@RequestMapping(method = RequestMethod.POST)

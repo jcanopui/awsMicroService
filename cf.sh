@@ -50,12 +50,12 @@ function deploy_register_service(){
 }
 
 function deploy_passport_service(){
-  deploy_app passport-service
+  deploy_app push-service
 }
 
 function reset(){
   cf d eureka-service
-  cf d passport-service
+  cf d push-service
   cf d register-service
   cf ds register-service-postgresql
   cf ds eureka-service

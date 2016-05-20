@@ -15,20 +15,21 @@ public class Token {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private int id;
 
     Token() {
     }
 
-    public Token(String userId) {
+    public Token(String userId, int token) {
         this.userId = userId;
+        this.id = token;
     }
 
     public String getUserId() {
         return userId;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 }

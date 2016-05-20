@@ -17,7 +17,7 @@
 
     <modules>
         <module>register-service</module>
-        <module>passport-service</module>
+        <module>push-service</module>
         <module>eureka-service</module>
     </modules>
 
