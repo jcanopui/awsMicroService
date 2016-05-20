@@ -3,8 +3,8 @@ package push;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
@@ -27,9 +27,8 @@ import java.util.List;
 public class Application {
 
     public static void main(String[] args) {
-        new SpringApplicationBuilder(Application.class)
-                .web(false)
-                .run(args);
+        SpringApplication.run(Application.class);
+        //SpringApplicationBuilder(Application.class).web(false).run(args);
     }
 }
 
