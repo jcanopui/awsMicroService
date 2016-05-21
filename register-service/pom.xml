@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>microservices</groupId>
-        <artifactId>service-registration-and-discovery</artifactId>
+        <artifactId>awsMicroService</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <name>service-registration-and-discovery:register-service</name>
+    <name>awsMicroService:register-service</name>
 
     <artifactId>register-service</artifactId>
     <properties>

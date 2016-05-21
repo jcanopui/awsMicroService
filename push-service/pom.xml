@@ -6,10 +6,10 @@
 
     <parent>
         <groupId>microservices</groupId>
-        <artifactId>service-registration-and-discovery</artifactId>
+        <artifactId>awsMicroService</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <name>service-registration-and-discovery:push-service</name>
+    <name>awsMicroService:push-service</name>
 
     <artifactId>push-service</artifactId>
     <packaging>jar</packaging>

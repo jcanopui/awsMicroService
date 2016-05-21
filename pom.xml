@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>microservices</groupId>
-    <artifactId>service-registration-and-discovery</artifactId>
+    <artifactId>awsMicroService</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <packaging>pom</packaging>

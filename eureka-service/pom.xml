@@ -5,11 +5,11 @@
 
     <parent>
         <groupId>microservices</groupId>
-        <artifactId>service-registration-and-discovery</artifactId>
+        <artifactId>awsMicroService</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <name>service-registration-and-discovery:eureka-service</name>
+    <name>awsMicroService:eureka-service</name>
     <artifactId>eureka-service</artifactId>
     <packaging>jar</packaging>
     <properties>
