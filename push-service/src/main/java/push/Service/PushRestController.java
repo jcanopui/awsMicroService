@@ -20,7 +20,7 @@ public class PushRestController {
     @Autowired
     private PushClient pushClient;
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = "/{message}", method = RequestMethod.GET)
     boolean sendPush(@PathVariable String userId,
                    @PathVariable String message) {
 
