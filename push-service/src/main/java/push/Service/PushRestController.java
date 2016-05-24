@@ -9,10 +9,6 @@ import push.Model.Token;
 
 import java.util.List;
 
-/**
- * Created by eduard on 20/05/16.
- */
-
 @RestController
 @RequestMapping("/{userId}/push")
 public class PushRestController {
@@ -24,7 +20,8 @@ public class PushRestController {
     boolean sendPush(@PathVariable String userId,
                    @PathVariable String message) {
 
-        List<Token> tokenList = pushClient.getTokens(userId);
+        @SuppressWarnings("unused")
+		List<Token> tokenList = pushClient.getTokens(userId);
         
         return false;
     }

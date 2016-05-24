@@ -1,12 +1,8 @@
-package register.Model;
+package com.zurich.register.model;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-
-/**
- * Created by eduard on 18/05/16.
- */
 
 @Entity
 public class Token {
