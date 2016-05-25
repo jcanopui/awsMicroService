@@ -1,6 +1,6 @@
-package com.zurich.entities;
+package com.zurich.data.structures;
 
-public class RequestClass {
+public class AddTokenRequest {
 
 	String platform;
 	
@@ -32,12 +32,12 @@ public class RequestClass {
 		this.identifier = identifier;
 	}
 	
-	public RequestClass(String platform, String token, String identifier) {
+	public AddTokenRequest(String platform, String token, String identifier) {
 		this.platform = platform;
 		this.token = token;
 		this.identifier = identifier;
 	}
 	
-	public RequestClass() {
+	public AddTokenRequest() {
 	}
 }

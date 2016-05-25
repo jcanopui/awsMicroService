@@ -1,8 +1,11 @@
 package com.zurich.entities;
 
+import javax.persistence.Entity;
+
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
+//@Entity(name="REGISTER_DEVICES")
 @DynamoDBTable(tableName="REGISTER_DEVICES")
 public class RegisterEntity {
 
@@ -19,9 +22,6 @@ public class RegisterEntity {
 		this.identifier = identifier;
 	}
 
-	/**
-	 * @return the token
-	 */
 	@DynamoDBHashKey()
 	public String getToken() {
 		return token;

@@ -1,6 +1,6 @@
-package com.zurich.entities;
+package com.zurich.data.structures;
 
-public class ResponseClass {
+public class AddTokenResponse {
 
 	String subscriptionArn;
 	
@@ -12,10 +12,10 @@ public class ResponseClass {
 		this.subscriptionArn = subscriptionArn;
 	}
 	
-	public ResponseClass(String subscriptionArn) {
+	public AddTokenResponse(String subscriptionArn) {
 		this.subscriptionArn = subscriptionArn;
 	}
 	
-	public ResponseClass() {
+	public AddTokenResponse() {
 	}
 }

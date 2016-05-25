@@ -4,10 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-/**
- * Created by eduard on 20/05/16.
- */
-
 @Component
 class FeignExample implements CommandLineRunner {
 
