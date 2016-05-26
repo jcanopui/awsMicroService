@@ -25,9 +25,9 @@ public class RegisterDAOImpl implements RegisterDAO {
 
 		Map<String, AttributeValue> values = new HashMap<>();
 		values.put(":val", new AttributeValue().withS(identifier));
-		ScanRequest scanRequest = new ScanRequest().withLimit(100).withTableName("REGISTER_DEVICES")
-				.withExpressionAttributeValues(values).withFilterExpression("identifier = :val")
-				.withProjectionExpression("token");
+		ScanRequest scanRequest = new ScanRequest().withLimit(100).withTableName(RegisterEntity.TABLE_NAME)
+				.withExpressionAttributeValues(values).withFilterExpression(RegisterEntity.FIELD_IDENTIFIER + " = :val")
+				.withProjectionExpression(String.format("%s,%s,%s", RegisterEntity.FIELD_DEVICE_TOKEN, RegisterEntity.FIELD_IDENTIFIER, RegisterEntity.FIELD_PLATFORM));
 
 		ScanResult scanResult = dynamoDB.scan(scanRequest);
 
@@ -39,7 +39,7 @@ public class RegisterDAOImpl implements RegisterDAO {
 	}
 
 	private RegisterEntity createRegister(Map<String, AttributeValue> dbRegister) {
-		return new RegisterEntity(dbRegister.get(RegisterEntity.FIELD_TOKEN).getS(),
+		return new RegisterEntity(dbRegister.get(RegisterEntity.FIELD_DEVICE_TOKEN).getS(),
 				dbRegister.get(RegisterEntity.FIELD_PLATFORM).getS(),
 				dbRegister.get(RegisterEntity.FIELD_IDENTIFIER).getS());
 	}

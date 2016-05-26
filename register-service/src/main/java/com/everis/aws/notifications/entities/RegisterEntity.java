@@ -1,34 +1,37 @@
 package com.everis.aws.notifications.entities;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 @DynamoDBTable(tableName="REGISTER_DEVICES")
 public class RegisterEntity {
-	public static final String FIELD_TOKEN = "token";
+	public static final String TABLE_NAME = "REGISTER_DEVICES";
+	public static final String FIELD_DEVICE_TOKEN = "device_token";
 	public static final String FIELD_PLATFORM = "platform";
 	public static final String FIELD_IDENTIFIER = "identifier";
 
-	private String token;
+	private String deviceToken;
 	
 	private String platform;
 	
 	private String identifier;
 
-	public RegisterEntity(String token, String platform, String identifier) {
+	public RegisterEntity(String deviceToken, String platform, String identifier) {
 		super();
-		this.token = token;
+		this.deviceToken = deviceToken;
 		this.platform = platform;
 		this.identifier = identifier;
 	}
 
 	@DynamoDBHashKey()
-	public String getToken() {
-		return token;
+	@DynamoDBAttribute(attributeName="device_token")
+	public String getDeviceToken() {
+		return deviceToken;
 	}
 
-	public void setToken(String token) {
-		this.token = token;
+	public void setDeviceToken(String deviceToken) {
+		this.deviceToken = deviceToken;
 	}
 
 	public String getPlatform() {

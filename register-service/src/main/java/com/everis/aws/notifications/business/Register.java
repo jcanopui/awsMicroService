@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.ClientConfiguration;
 import com.amazonaws.services.apigateway.model.NotFoundException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
@@ -29,29 +28,26 @@ public class Register {
 	private static final String TOPIC_ARN_FOR_PUSHES = "arn:aws:sns:us-east-1:721597765533:PUSH_TO_DEVICE";
 	private static final String PLATFORM_ANDROID = "android";
 	private static final String ANDROID_APPLICATION = "arn:aws:sns:us-east-1:721597765533:app/GCM/ANDROID_SAMPLE_APPL";
-	
-	@Autowired
-	ClientConfiguration clientConfiguration;
-	
-	@Autowired
-	AmazonSNS client;
 
 	@Autowired
-	AmazonDynamoDB dynamoClient;
+	private AmazonSNS client;
+
+	@Autowired
+	private AmazonDynamoDB dynamoClient;
 
 	public AddTokenResponse registerToken(String token, String platform, String identifier) {
-		String platformArn = getPlatformArn(platform);
-
-		String subscriptionArn = registerNotificationDevice(platformArn, token);
+		String subscriptionArn = registerNotificationDevice(platform, token);
 
 		saveToDynamoDB(token, platform, identifier);
 
 		return new AddTokenResponse(subscriptionArn);
 	}
 
-	private String registerNotificationDevice(String platformArn, String token) {
+	private String registerNotificationDevice(String platform, String token) {
 		boolean updateNeeded = false;
 		boolean createNeeded = false;
+
+		String platformArn = getPlatformArn(platform);
 
 		String endpointArn = createEndpointWithPlatformAndToken(platformArn, token);
 
@@ -78,28 +74,25 @@ public class Register {
 	}
 
 	private String getPlatformArn(String platformType) {
-		String platformArn = null;
-		if (platformType.equalsIgnoreCase(PLATFORM_ANDROID)) {
-			platformArn = ANDROID_APPLICATION;
-		} else 
+		if (!platformType.equalsIgnoreCase(PLATFORM_ANDROID))
 			throw new RuntimeException("Platform type not supported: " + platformType);
 
-		return platformArn;
+		return ANDROID_APPLICATION;
 	}
 
 	private String createEndpointWithPlatformAndToken(String platformArn, String token) {
-		String endpointArn = null;
 		CreatePlatformEndpointRequest cpeReq = new CreatePlatformEndpointRequest()
 				.withPlatformApplicationArn(platformArn).withToken(token);
 		CreatePlatformEndpointResult cpeRes = client.createPlatformEndpoint(cpeReq);
-		endpointArn = cpeRes.getEndpointArn();
-		return endpointArn;
+
+		return cpeRes.getEndpointArn();
 	}
 
 	private void updateEndpointAndToken(String endpointArn, String token) {
 		Map<String, String> attributes = new HashMap<String, String>();
 		attributes.put(ATTR_TOKEN, token);
 		attributes.put(ATTR_ENABLED, TRUE);
+
 		SetEndpointAttributesRequest saeReq = new SetEndpointAttributesRequest().withEndpointArn(endpointArn)
 				.withAttributes(attributes);
 		client.setEndpointAttributes(saeReq);
@@ -112,7 +105,6 @@ public class Register {
 	}
 
 	private void saveToDynamoDB(String token, String platform, String identifier) {
-
 		DynamoDBMapper mapper = new DynamoDBMapper(dynamoClient);
 
 		RegisterEntity register = new RegisterEntity(token, platform, identifier);
