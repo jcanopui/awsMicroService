@@ -1,91 +1,88 @@
-package com.zurich;
+package com.everis.aws.push.sns;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.Protocol;
+import com.amazonaws.auth.ClasspathPropertiesFileCredentialsProvider;
+import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.lambda.runtime.events.DynamodbEvent;
-import com.amazonaws.services.lambda.runtime.events.DynamodbEvent.DynamodbStreamRecord;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
+import com.everis.aws.push.entities.NotificationEntity;
+import com.everis.aws.push.entities.NotificationStatusEntity;
+import com.everis.aws.push.entities.ResponseClass;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zurich.entities.NotificationEntity;
-import com.zurich.entities.NotificationStatusEntity;
-import com.zurich.entities.ResponseClass;
 
-public class SendNotification implements RequestHandler<DynamodbEvent, String> {
+@Component
+public class SendNotification {
 
-	static AmazonSNS client = new AmazonSNSClient();
+	private static AmazonSNS client = null;
 
-	static AmazonDynamoDBClient dynamoClient = new AmazonDynamoDBClient().withRegion(Regions.US_EAST_1);
+	private static ClientConfiguration clientConfig = null;
+
+	private static AmazonDynamoDBClient dynamoClient = null;
 
 	private static final String TOPIC_ARN_FOR_PUSHES = "arn:aws:sns:us-east-1:721597765533:PUSH_TO_DEVICE";
 
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
-	public String handleRequest(DynamodbEvent event, Context context) {
 
-		ResponseClass response = null;
-
-		for (DynamodbStreamRecord record : event.getRecords()) {
-
-			NotificationEntity notificationEntity = new NotificationEntity();
-
-			Map<String, AttributeValue> items = record.getDynamodb().getNewImage();
-
-			if (items != null) {
-
-				items.forEach((k, v) -> System.out.println("Item : " + k + " Count : " + v));
-				items.forEach((k, v) -> notificationEntity.setValue(k, v));
-
-				if (notificationEntity.isTopic()) {
-					response = sendTopic(notificationEntity, context);
-				} else {
-					response = sendPush(notificationEntity, context);
-				}
-
-				saveNotificationStatus(notificationEntity.getNotificationId());
-
-			} else {
-				System.out.println("new image was null");
-				response = new ResponseClass("KO");
-			}
-		}
-		return response.getMessageId();
+	public SendNotification() {
+		super();
+		
+		this.init();
 	}
 
-	public ResponseClass sendPush(NotificationEntity notificationEntity, Context context) {
-
-		ResponseClass response = null;
-
-		try {
-			PublishRequest publishRequest = new PublishRequest();
-
-			String targetAWS = notificationEntity.getTargetAWS();
-			String fixedTargetAWS = targetAWS;
-
-			publishRequest.setTargetArn(fixedTargetAWS);
-
-			PublishResult publishResult = publish(publishRequest, notificationEntity);
-
-			response = new ResponseClass(publishResult.getMessageId());
-
-		} catch (Exception e) {
-			System.out.println("Exception: " + e.getLocalizedMessage());
-			response = new ResponseClass("KO");
+	private void init() {
+		if (dynamoClient == null) {
+			dynamoClient = new AmazonDynamoDBClient(new ClasspathPropertiesFileCredentialsProvider(), 
+													getClientConfiguration());
+			dynamoClient.setRegion(Region.getRegion(Regions.US_EAST_1));
 		}
-
-		return response;
+		if (client == null) {
+			client = new AmazonSNSClient(new ClasspathPropertiesFileCredentialsProvider(), 
+										getClientConfiguration());
+			client.setRegion(Region.getRegion(Regions.US_EAST_1));
+		}
 	}
 
-	public ResponseClass sendTopic(NotificationEntity notificationEntity, Context context) {
+	private static ClientConfiguration getClientConfiguration() {
+		if (clientConfig == null) {
+			clientConfig = new ClientConfiguration();
+			clientConfig.setProtocol(Protocol.HTTP);
+
+			clientConfig.setProxyHost("10.110.8.42");
+			clientConfig.setProxyPort(8080);
+			clientConfig.setProxyUsername("XXXXX");
+			clientConfig.setProxyPassword("XXXXX");
+		}
+		return clientConfig;
+	}
+
+	public ResponseClass sendNotification(String tokenId, String message) {
+		ResponseClass result = null;
+		
+		NotificationEntity notificationEntity = new NotificationEntity();
+		notificationEntity.setMessage(message);
+		notificationEntity.setNotificationId(notificationEntity.getNotificationId()+1);
+		notificationEntity.setTopic(true);
+	
+		result = sendTopic(notificationEntity);
+		
+		saveNotificationStatus(notificationEntity.getNotificationId());
+		
+		return result;
+	}
+
+	public ResponseClass sendTopic(NotificationEntity notificationEntity) {
 
 		PublishRequest publishRequest = new PublishRequest();
 

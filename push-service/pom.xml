@@ -13,8 +13,9 @@
 
 	<artifactId>push-service</artifactId>
 	<packaging>jar</packaging>
+	
 	<properties>
-		<start-class>push.Application</start-class>
+		<start-class>com.everis.aws.push.PushApplication</start-class>
 	</properties>
 
 	<dependencies>
