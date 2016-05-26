@@ -1,13 +1,13 @@
-package com.zurich.entities;
-
-import javax.persistence.Entity;
+package com.everis.aws.notifications.entities;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
-//@Entity(name="REGISTER_DEVICES")
 @DynamoDBTable(tableName="REGISTER_DEVICES")
 public class RegisterEntity {
+	public static final String FIELD_TOKEN = "token";
+	public static final String FIELD_PLATFORM = "platform";
+	public static final String FIELD_IDENTIFIER = "identifier";
 
 	private String token;
 	

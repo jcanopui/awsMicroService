@@ -1,4 +1,6 @@
-package com.zurich.controllers;
+package com.everis.aws.notifications.controllers;
+
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -7,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zurich.Register;
-import com.zurich.data.structures.AddTokenResponse;
-import com.zurich.db.RegisterDAO;
-import com.zurich.entities.RegisterEntity;
+import com.everis.aws.notifications.business.Register;
+import com.everis.aws.notifications.data.structures.AddTokenResponse;
+import com.everis.aws.notifications.db.RegisterDAO;
+import com.everis.aws.notifications.entities.RegisterEntity;
 
 @RestController
 @RequestMapping("/tokens")
@@ -27,8 +29,8 @@ class SNSTokenRestController {
 		return register.registerToken(token, platform, identifier);
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
-	RegisterEntity putToken(@PathVariable String identifier) {
+	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET)
+	List<RegisterEntity> putToken(@PathVariable String identifier) {
 		return registerDAO.findByIdentifier(identifier);
 	}
 }

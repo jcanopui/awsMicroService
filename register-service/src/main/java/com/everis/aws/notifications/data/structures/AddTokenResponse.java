@@ -1,4 +1,4 @@
-package com.zurich.data.structures;
+package com.everis.aws.notifications.data.structures;
 
 public class AddTokenResponse {
 
