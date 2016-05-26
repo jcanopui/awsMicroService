@@ -1,4 +1,4 @@
-package com.zurich;
+package com.everis.aws.notifications.business;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,13 +6,11 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.regions.Regions;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.services.apigateway.model.NotFoundException;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
 import com.amazonaws.services.sns.model.CreatePlatformEndpointResult;
 import com.amazonaws.services.sns.model.GetEndpointAttributesRequest;
@@ -20,33 +18,40 @@ import com.amazonaws.services.sns.model.GetEndpointAttributesResult;
 import com.amazonaws.services.sns.model.SetEndpointAttributesRequest;
 import com.amazonaws.services.sns.model.SubscribeRequest;
 import com.amazonaws.services.sns.model.SubscribeResult;
-import com.zurich.data.structures.AddTokenResponse;
-import com.zurich.entities.RegisterEntity;
+import com.everis.aws.notifications.data.structures.AddTokenResponse;
+import com.everis.aws.notifications.entities.RegisterEntity;
 
 @Component
 public class Register {
 	private static final String ATTR_TOKEN = "Token";
 	private static final String ATTR_ENABLED = "Enabled";
 	private static final String TRUE = "true";
-	//private static final String TOPIC_ARN_FOR_PUSHES = "arn:aws:sns:us-east-1:688943189407:AMEU8";
 	private static final String TOPIC_ARN_FOR_PUSHES = "arn:aws:sns:us-east-1:721597765533:PUSH_TO_DEVICE";
 	private static final String PLATFORM_ANDROID = "android";
 	private static final String ANDROID_APPLICATION = "arn:aws:sns:us-east-1:721597765533:app/GCM/ANDROID_SAMPLE_APPL";
-	//private static final String ANDROID_APPLICATION = "arn:aws:sns:us-east-1:688943189407:app/GCM/AMEU8_GCM";
 	
 	@Autowired
-	private AWSCredentials aWSCredentials;
+	ClientConfiguration clientConfiguration;
+	
+	@Autowired
+	AmazonSNS client;
 
-	AmazonSNS client = new AmazonSNSClient(aWSCredentials);
-
-	AmazonDynamoDBClient dynamoClient = new AmazonDynamoDBClient().withRegion(Regions.US_EAST_1);
+	@Autowired
+	AmazonDynamoDB dynamoClient;
 
 	public AddTokenResponse registerToken(String token, String platform, String identifier) {
+		String platformArn = getPlatformArn(platform);
 
+		String subscriptionArn = registerNotificationDevice(platformArn, token);
+
+		saveToDynamoDB(token, platform, identifier);
+
+		return new AddTokenResponse(subscriptionArn);
+	}
+
+	private String registerNotificationDevice(String platformArn, String token) {
 		boolean updateNeeded = false;
 		boolean createNeeded = false;
-
-		String platformArn = getPlatformArn(platform);
 
 		String endpointArn = createEndpointWithPlatformAndToken(platformArn, token);
 
@@ -69,11 +74,7 @@ public class Register {
 			updateEndpointAndToken(endpointArn, token);
 		}
 
-		String subscriptionArn = subscribeToTopic(endpointArn);
-
-		saveToDynamoDB(token, platform, identifier);
-
-		return new AddTokenResponse(subscriptionArn);
+		return subscribeToTopic(endpointArn);
 	}
 
 	private String getPlatformArn(String platformType) {
@@ -116,14 +117,5 @@ public class Register {
 
 		RegisterEntity register = new RegisterEntity(token, platform, identifier);
 		mapper.save(register);
-	}
-
-	private String findTokenFromUser(String identifier) {
-
-		DynamoDBMapper mapper = new DynamoDBMapper(dynamoClient);
-
-		//RegisterEntity register = new RegisterEntity(token, platform, identifier);
-		//mapper.save(register);
-		return null;
 	}
 }
