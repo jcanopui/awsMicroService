@@ -9,10 +9,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.everis.aws.push.entities.RegisterEntity;
 
-/**
- * Created by eduard on 20/05/16.
- */
-
 @FeignClient("register-service")
 public interface PushClient {
 

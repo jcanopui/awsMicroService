@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.apigateway.model.NotFoundException;
@@ -25,9 +26,13 @@ public class Register {
 	private static final String ATTR_TOKEN = "Token";
 	private static final String ATTR_ENABLED = "Enabled";
 	private static final String TRUE = "true";
-	private static final String TOPIC_ARN_FOR_PUSHES = "arn:aws:sns:us-east-1:721597765533:PUSH_TO_DEVICE";
 	private static final String PLATFORM_ANDROID = "android";
-	private static final String ANDROID_APPLICATION = "arn:aws:sns:us-east-1:721597765533:app/GCM/ANDROID_SAMPLE_APPL";
+
+	@Value("${everis.aws.notifications.topicForPushes}")
+	private String topicForPushes;
+
+	@Value("${everis.aws.notifications.androidApplication}")
+	private String androidApplication;
 
 	@Autowired
 	private AmazonSNS client;
@@ -36,11 +41,11 @@ public class Register {
 	private AmazonDynamoDB dynamoClient;
 
 	public AddTokenResponse registerToken(String token, String platform, String identifier, String protocol) {
-		String subscriptionArn = registerNotificationDevice(platform, token, protocol);
+		String endpointArn = registerNotificationDevice(platform, token, protocol);
 
-		saveToDynamoDB(token, platform, identifier);
+		saveToDynamoDB(token, platform, identifier, endpointArn);
 
-		return new AddTokenResponse(subscriptionArn);
+		return new AddTokenResponse(endpointArn);
 	}
 
 	private String registerNotificationDevice(String platform, String token, String protocol) {
@@ -70,14 +75,16 @@ public class Register {
 			updateEndpointAndToken(endpointArn, token);
 		}
 
-		return subscribeToTopic(endpointArn, protocol);
+		subscribeToTopic(endpointArn, protocol);
+
+		return endpointArn;
 	}
 
 	private String getPlatformArn(String platformType) {
 		if (!platformType.equalsIgnoreCase(PLATFORM_ANDROID))
 			throw new RuntimeException("Platform type not supported: " + platformType);
 
-		return ANDROID_APPLICATION;
+		return androidApplication;
 	}
 
 	private String createEndpointWithPlatformAndToken(String platformArn, String token) {
@@ -99,15 +106,15 @@ public class Register {
 	}
 
 	private String subscribeToTopic(String endpointArn, String protocol) {
-		SubscribeRequest subscribeReq = new SubscribeRequest(TOPIC_ARN_FOR_PUSHES, protocol, endpointArn);
+		SubscribeRequest subscribeReq = new SubscribeRequest(topicForPushes, protocol, endpointArn);
 		SubscribeResult subscribeRes = client.subscribe(subscribeReq);
 		return subscribeRes.getSubscriptionArn();
 	}
 
-	private void saveToDynamoDB(String token, String platform, String identifier) {
+	private void saveToDynamoDB(String token, String platform, String identifier, String endpointARN) {
 		DynamoDBMapper mapper = new DynamoDBMapper(dynamoClient);
 
-		RegisterEntity register = new RegisterEntity(token, platform, identifier);
+		RegisterEntity register = new RegisterEntity(token, platform, identifier, endpointARN);
 		mapper.save(register);
 	}
 }

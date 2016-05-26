@@ -27,7 +27,9 @@ public class RegisterDAOImpl implements RegisterDAO {
 		values.put(":val", new AttributeValue().withS(identifier));
 		ScanRequest scanRequest = new ScanRequest().withLimit(100).withTableName(RegisterEntity.TABLE_NAME)
 				.withExpressionAttributeValues(values).withFilterExpression(RegisterEntity.FIELD_IDENTIFIER + " = :val")
-				.withProjectionExpression(String.format("%s,%s,%s", RegisterEntity.FIELD_DEVICE_TOKEN, RegisterEntity.FIELD_IDENTIFIER, RegisterEntity.FIELD_PLATFORM));
+				.withProjectionExpression(
+						String.format("%s,%s,%s,%s", RegisterEntity.FIELD_DEVICE_TOKEN, RegisterEntity.FIELD_IDENTIFIER,
+								RegisterEntity.FIELD_PLATFORM, RegisterEntity.FIELD_ENDPOINT_ARN));
 
 		ScanResult scanResult = dynamoDB.scan(scanRequest);
 
@@ -41,6 +43,7 @@ public class RegisterDAOImpl implements RegisterDAO {
 	private RegisterEntity createRegister(Map<String, AttributeValue> dbRegister) {
 		return new RegisterEntity(dbRegister.get(RegisterEntity.FIELD_DEVICE_TOKEN).getS(),
 				dbRegister.get(RegisterEntity.FIELD_PLATFORM).getS(),
-				dbRegister.get(RegisterEntity.FIELD_IDENTIFIER).getS());
+				dbRegister.get(RegisterEntity.FIELD_IDENTIFIER).getS(),
+				dbRegister.get(RegisterEntity.FIELD_ENDPOINT_ARN).getS());
 	}
 }

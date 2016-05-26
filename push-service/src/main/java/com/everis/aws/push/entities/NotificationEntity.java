@@ -49,9 +49,6 @@ public class NotificationEntity {
 		return topic;
 	}
 
-	/**
-	 * @param topic the topic to set
-	 */
 	public void setTopic(boolean topic) {
 		this.topic = topic;
 	}
@@ -60,9 +57,6 @@ public class NotificationEntity {
 		return targetAWS;
 	}
 
-	/**
-	 * @param targetAWS the targetAWS to set
-	 */
 	public void setTargetAWS(String targetAWS) {
 		this.targetAWS = targetAWS;
 	}	

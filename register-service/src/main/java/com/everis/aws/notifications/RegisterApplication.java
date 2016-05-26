@@ -13,6 +13,8 @@ import com.amazonaws.ClientConfiguration;
 import com.amazonaws.Protocol;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClient;
@@ -38,8 +40,8 @@ public class RegisterApplication {
 	@Value("${amazon.aws.secretkey}")
 	private String amazonAWSSecretKey;
 
-	@Value("${everis.aws.notifications.useProxy}")
-	private Boolean useProxy;
+	@Value("${everis.aws.notifications.useProxiedDevEnvironment}")
+	private Boolean useProxiedDevEnvironment;
 
 	@Value("${everis.aws.notifications.proxyHost}")
 	private String proxyHost;
@@ -60,11 +62,16 @@ public class RegisterApplication {
 
 	@Bean
 	public AmazonDynamoDB amazonDynamoDB(AWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
-		AmazonDynamoDB amazonDynamoDB = new AmazonDynamoDBClient(awsCredentials, clientConfiguration);
+		AmazonDynamoDB amazonDynamoDB;
+		if (useProxiedDevEnvironment)
+			amazonDynamoDB = new AmazonDynamoDBClient(awsCredentials, clientConfiguration);
+		else
+			amazonDynamoDB = new AmazonDynamoDBClient();
 		if (!StringUtils.isEmpty(amazonDynamoDBEndpoint)) {
 			amazonDynamoDB.setEndpoint(amazonDynamoDBEndpoint);
 		}
-
+		amazonDynamoDB.setRegion(Region.getRegion(Regions.US_EAST_1));
+		
 		return amazonDynamoDB;
 	}
 
@@ -75,7 +82,14 @@ public class RegisterApplication {
 
 	@Bean
 	public AmazonDynamoDBStreamsClient amazonDynamoDBStreamsAsyncClient(AWSCredentials awsCredentials) {
-		return new AmazonDynamoDBStreamsClient(awsCredentials);
+		AmazonDynamoDBStreamsClient amazonDynamoDBStreamsClient;
+		if (useProxiedDevEnvironment)
+			amazonDynamoDBStreamsClient = new AmazonDynamoDBStreamsClient(awsCredentials);
+		else
+			amazonDynamoDBStreamsClient = new AmazonDynamoDBStreamsClient();
+		amazonDynamoDBStreamsClient.setRegion(Region.getRegion(Regions.US_EAST_1));
+
+		return amazonDynamoDBStreamsClient;
 	}
 
 	@Bean
@@ -88,7 +102,7 @@ public class RegisterApplication {
 		ClientConfiguration clientConfiguration = new ClientConfiguration();
 		clientConfiguration.setProtocol(Protocol.HTTP);
 
-		if (useProxy != null && useProxy) {
+		if (useProxiedDevEnvironment != null && useProxiedDevEnvironment) {
 			clientConfiguration.setProxyHost(proxyHost);
 			clientConfiguration.setProxyPort(proxyPort);
 			clientConfiguration.setProxyUsername(username);
@@ -102,6 +116,13 @@ public class RegisterApplication {
 	@Bean
 	@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public AmazonSNS amazonSNS(AWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
-		return new AmazonSNSClient(awsCredentials, clientConfiguration);
+		AmazonSNSClient amazonSNSClient;
+		if (useProxiedDevEnvironment)
+			amazonSNSClient = new AmazonSNSClient(awsCredentials, clientConfiguration);
+		else
+			amazonSNSClient = new AmazonSNSClient();
+		amazonSNSClient.setRegion(Region.getRegion(Regions.US_EAST_1));
+	
+		return amazonSNSClient;
 	}
 }

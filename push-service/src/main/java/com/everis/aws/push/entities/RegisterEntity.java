@@ -3,34 +3,37 @@ package com.everis.aws.push.entities;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
-//@Entity(name="REGISTER_DEVICES")
 @DynamoDBTable(tableName="REGISTER_DEVICES")
 public class RegisterEntity {
+	public static final String TABLE_NAME = "REGISTER_DEVICES";
+	public static final String FIELD_DEVICE_TOKEN = "deviceToken";
+	public static final String FIELD_PLATFORM = "platform";
+	public static final String FIELD_IDENTIFIER = "identifier";
+	public static final String FIELD_ENDPOINT_ARN = "endpointARN";
 
-	private String token;
+	private String deviceToken;
 	
 	private String platform;
 	
 	private String identifier;
 
-	public RegisterEntity() {
-		super();
-	}
+	private String endpointARN;
 
-	public RegisterEntity(String token, String platform, String identifier) {
+	public RegisterEntity(String deviceToken, String platform, String identifier, String endpointARN) {
 		super();
-		this.token = token;
+		this.deviceToken = deviceToken;
 		this.platform = platform;
 		this.identifier = identifier;
+		this.endpointARN = endpointARN;
 	}
 
 	@DynamoDBHashKey()
-	public String getToken() {
-		return token;
+	public String getDeviceToken() {
+		return deviceToken;
 	}
 
-	public void setToken(String token) {
-		this.token = token;
+	public void setDeviceToken(String deviceToken) {
+		this.deviceToken = deviceToken;
 	}
 
 	public String getPlatform() {
@@ -49,11 +52,16 @@ public class RegisterEntity {
 		this.identifier = identifier;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
+	public String getEndpointARN() {
+		return endpointARN;
+	}
+
+	public void setEndpointARN(String endpointARN) {
+		this.endpointARN = endpointARN;
+	}
+
 	@Override
 	public String toString() {
-		return "RegisterEntity [token=" + token + ", platform=" + platform + ", identifier=" + identifier + "]";
+		return String.format("RegisterEntity [token=%s, platform=%s, identifier=%s, endpointARN=%s]",  deviceToken, platform, identifier, endpointARN);
 	}
 }

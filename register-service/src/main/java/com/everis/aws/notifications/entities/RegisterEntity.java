@@ -1,15 +1,15 @@
 package com.everis.aws.notifications.entities;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 @DynamoDBTable(tableName="REGISTER_DEVICES")
 public class RegisterEntity {
 	public static final String TABLE_NAME = "REGISTER_DEVICES";
-	public static final String FIELD_DEVICE_TOKEN = "device_token";
+	public static final String FIELD_DEVICE_TOKEN = "deviceToken";
 	public static final String FIELD_PLATFORM = "platform";
 	public static final String FIELD_IDENTIFIER = "identifier";
+	public static final String FIELD_ENDPOINT_ARN = "endpointARN";
 
 	private String deviceToken;
 	
@@ -17,15 +17,17 @@ public class RegisterEntity {
 	
 	private String identifier;
 
-	public RegisterEntity(String deviceToken, String platform, String identifier) {
+	private String endpointARN;
+
+	public RegisterEntity(String deviceToken, String platform, String identifier, String endpointARN) {
 		super();
 		this.deviceToken = deviceToken;
 		this.platform = platform;
 		this.identifier = identifier;
+		this.endpointARN = endpointARN;
 	}
 
 	@DynamoDBHashKey()
-	@DynamoDBAttribute(attributeName="device_token")
 	public String getDeviceToken() {
 		return deviceToken;
 	}
@@ -48,5 +50,18 @@ public class RegisterEntity {
 
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
+	}
+
+	public String getEndpointARN() {
+		return endpointARN;
+	}
+
+	public void setEndpointARN(String endpointARN) {
+		this.endpointARN = endpointARN;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("RegisterEntity [token=%s, platform=%s, identifier=%s, endpointARN=%s]",  deviceToken, platform, identifier, endpointARN);
 	}
 }

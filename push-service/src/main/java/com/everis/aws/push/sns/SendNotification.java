@@ -1,8 +1,12 @@
 package com.everis.aws.push.sns;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.ClientConfiguration;
@@ -18,6 +22,7 @@ import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 import com.everis.aws.push.entities.NotificationEntity;
 import com.everis.aws.push.entities.NotificationStatusEntity;
+import com.everis.aws.push.entities.RegisterEntity;
 import com.everis.aws.push.entities.ResponseClass;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -34,22 +39,23 @@ public class SendNotification {
 
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
+	@Value("${everis.aws.notifications.topicForPushes}")
+	private String topicForPushes;
 
 	public SendNotification() {
 		super();
-		
+
 		this.init();
 	}
 
 	private void init() {
 		if (dynamoClient == null) {
-			dynamoClient = new AmazonDynamoDBClient(new ClasspathPropertiesFileCredentialsProvider(), 
-													getClientConfiguration());
+			dynamoClient = new AmazonDynamoDBClient(new ClasspathPropertiesFileCredentialsProvider(),
+					getClientConfiguration());
 			dynamoClient.setRegion(Region.getRegion(Regions.US_EAST_1));
 		}
 		if (client == null) {
-			client = new AmazonSNSClient(new ClasspathPropertiesFileCredentialsProvider(), 
-										getClientConfiguration());
+			client = new AmazonSNSClient(new ClasspathPropertiesFileCredentialsProvider(), getClientConfiguration());
 			client.setRegion(Region.getRegion(Regions.US_EAST_1));
 		}
 	}
@@ -61,25 +67,52 @@ public class SendNotification {
 
 			clientConfig.setProxyHost("10.110.8.42");
 			clientConfig.setProxyPort(8080);
-			clientConfig.setProxyUsername("XXXXX");
-			clientConfig.setProxyPassword("XXXXX");
+			clientConfig.setProxyUsername("rmartita");
+			clientConfig.setProxyPassword("Rm30032016");
 		}
 		return clientConfig;
 	}
 
-	public ResponseClass sendNotification(String tokenId, String message) {
-		ResponseClass result = null;
-		
+	public ResponseClass broadcastNotification(String message) {
 		NotificationEntity notificationEntity = new NotificationEntity();
 		notificationEntity.setMessage(message);
-		notificationEntity.setNotificationId(notificationEntity.getNotificationId()+1);
+		notificationEntity.setNotificationId(new Random().nextLong());
 		notificationEntity.setTopic(true);
-	
-		result = sendTopic(notificationEntity);
-		
-		saveNotificationStatus(notificationEntity.getNotificationId());
-		
+
+		ResponseClass result = sendTopic(notificationEntity);
+
+		saveNotification(notificationEntity);
+
 		return result;
+	}
+
+	public ResponseClass pushNotificationToUserDevices(String message, List<RegisterEntity> resgistryEntityList) {
+		List<ResponseClass> resultClassList = new LinkedList<>();
+
+		resgistryEntityList.stream().forEach(p -> {
+			NotificationEntity notificationEntity = new NotificationEntity();
+			notificationEntity.setMessage(message);
+			notificationEntity.setNotificationId(new Random().nextLong());
+			notificationEntity.setTopic(false);
+			notificationEntity.setTargetAWS(p.getEndpointARN());
+
+			resultClassList.add(sendTopic(notificationEntity));
+
+			saveNotification(notificationEntity);
+		});
+
+		StringBuilder resultBuilder = new StringBuilder();
+		resultClassList.stream().forEach(p -> {
+			resultBuilder.append(p.getMessageId());
+			resultBuilder.append(",");
+		});
+
+		// Remove last comma
+		String result = resultBuilder.toString();
+		if (result.length() > 1)
+			result = result.substring(0, result.length() - 1);
+
+		return new ResponseClass("[" + result + "]");
 	}
 
 	public ResponseClass sendTopic(NotificationEntity notificationEntity) {
@@ -87,24 +120,20 @@ public class SendNotification {
 		PublishRequest publishRequest = new PublishRequest();
 
 		publishRequest.setTopicArn(TOPIC_ARN_FOR_PUSHES);
+		publishRequest.setTargetArn(notificationEntity.getTargetAWS());
 
 		PublishResult publishResult = publish(publishRequest, notificationEntity);
 
 		return new ResponseClass(publishResult.getMessageId());
 	}
 
-	/**
-	 * Update status to send to notification with specified notificationId
-	 * 
-	 * @param notificationId
-	 *            notification identifier
-	 */
-	private void saveNotificationStatus(long notificationId) {
-
+	private void saveNotification(NotificationEntity notificationEntity) {
 		DynamoDBMapper mapper = new DynamoDBMapper(dynamoClient);
 
-		NotificationStatusEntity notificationStatus = new NotificationStatusEntity(notificationId,
-				NotificationStatusEntity.SEND);
+		mapper.save(notificationEntity);
+
+		NotificationStatusEntity notificationStatus = new NotificationStatusEntity(
+				notificationEntity.getNotificationId(), NotificationStatusEntity.SEND);
 		mapper.save(notificationStatus);
 	}
 
