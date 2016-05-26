@@ -1,10 +1,14 @@
-package push.Model;
+/**
+ * 
+ */
+package com.everis.aws.push.entities;
 
 /**
- * Created by eduard on 20/05/16.
+ * @author jcanopui
+ *
  */
-
 public class Token {
+
     private Long id;
     private String userId;
 
@@ -23,4 +27,5 @@ public class Token {
     public String getUserId() {
         return userId;
     }
+    
 }

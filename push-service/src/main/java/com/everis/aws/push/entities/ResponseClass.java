@@ -1,4 +1,4 @@
-package com.zurich.entities;
+package com.everis.aws.push.entities;
 
 public class ResponseClass {
 	
