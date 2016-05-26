@@ -35,15 +35,15 @@ public class Register {
 	@Autowired
 	private AmazonDynamoDB dynamoClient;
 
-	public AddTokenResponse registerToken(String token, String platform, String identifier) {
-		String subscriptionArn = registerNotificationDevice(platform, token);
+	public AddTokenResponse registerToken(String token, String platform, String identifier, String protocol) {
+		String subscriptionArn = registerNotificationDevice(platform, token, protocol);
 
 		saveToDynamoDB(token, platform, identifier);
 
 		return new AddTokenResponse(subscriptionArn);
 	}
 
-	private String registerNotificationDevice(String platform, String token) {
+	private String registerNotificationDevice(String platform, String token, String protocol) {
 		boolean updateNeeded = false;
 		boolean createNeeded = false;
 
@@ -70,7 +70,7 @@ public class Register {
 			updateEndpointAndToken(endpointArn, token);
 		}
 
-		return subscribeToTopic(endpointArn);
+		return subscribeToTopic(endpointArn, protocol);
 	}
 
 	private String getPlatformArn(String platformType) {
@@ -98,8 +98,8 @@ public class Register {
 		client.setEndpointAttributes(saeReq);
 	}
 
-	private String subscribeToTopic(String endpointArn) {
-		SubscribeRequest subscribeReq = new SubscribeRequest(TOPIC_ARN_FOR_PUSHES, "application", endpointArn);
+	private String subscribeToTopic(String endpointArn, String protocol) {
+		SubscribeRequest subscribeReq = new SubscribeRequest(TOPIC_ARN_FOR_PUSHES, protocol, endpointArn);
 		SubscribeResult subscribeRes = client.subscribe(subscribeReq);
 		return subscribeRes.getSubscriptionArn();
 	}

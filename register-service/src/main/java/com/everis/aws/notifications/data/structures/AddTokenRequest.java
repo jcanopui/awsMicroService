@@ -2,11 +2,14 @@ package com.everis.aws.notifications.data.structures;
 
 public class AddTokenRequest {
 
-	String platform;
+	private String platform;
 	
-	String token;
+	private String token;
 	
-	String identifier;
+	private String identifier;
+	
+	//values: "application", "email"
+	private String protocol;
 	
 	public String getPlatform() {
 		return platform;
@@ -39,5 +42,19 @@ public class AddTokenRequest {
 	}
 	
 	public AddTokenRequest() {
+	}
+
+	/**
+	 * @return the protocol
+	 */
+	public String getProtocol() {
+		return protocol;
+	}
+
+	/**
+	 * @param protocol the protocol to set
+	 */
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
 	}
 }

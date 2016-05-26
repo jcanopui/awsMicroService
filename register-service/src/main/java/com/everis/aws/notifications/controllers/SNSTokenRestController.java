@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everis.aws.notifications.business.Register;
+import com.everis.aws.notifications.data.structures.AddTokenRequest;
 import com.everis.aws.notifications.data.structures.AddTokenResponse;
 import com.everis.aws.notifications.db.RegisterDAO;
 import com.everis.aws.notifications.entities.RegisterEntity;
@@ -25,12 +26,12 @@ class SNSTokenRestController {
 	private Register register;
 
 	@RequestMapping(method = RequestMethod.POST)
-	AddTokenResponse putToken(@RequestParam String token, @RequestParam String platform, @RequestParam String identifier) {
-		return register.registerToken(token, platform, identifier);
+	public AddTokenResponse registerToken(AddTokenRequest request) {
+		return register.registerToken(request.getToken(), request.getPlatform(), request.getIdentifier(), request.getProtocol());
 	}
 
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET)
-	List<RegisterEntity> putToken(@PathVariable String identifier) {
+	public List<RegisterEntity> getToken(@PathVariable String identifier) {
 		return registerDAO.findByIdentifier(identifier);
 	}
 }
