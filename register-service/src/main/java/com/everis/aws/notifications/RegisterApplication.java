@@ -66,7 +66,7 @@ public class RegisterApplication {
 		if (useProxiedDevEnvironment)
 			amazonDynamoDB = new AmazonDynamoDBClient(awsCredentials, clientConfiguration);
 		else
-			amazonDynamoDB = new AmazonDynamoDBClient();
+			amazonDynamoDB = new AmazonDynamoDBClient(awsCredentials);
 		if (!StringUtils.isEmpty(amazonDynamoDBEndpoint)) {
 			amazonDynamoDB.setEndpoint(amazonDynamoDBEndpoint);
 		}
@@ -83,10 +83,7 @@ public class RegisterApplication {
 	@Bean
 	public AmazonDynamoDBStreamsClient amazonDynamoDBStreamsAsyncClient(AWSCredentials awsCredentials) {
 		AmazonDynamoDBStreamsClient amazonDynamoDBStreamsClient;
-		if (useProxiedDevEnvironment)
-			amazonDynamoDBStreamsClient = new AmazonDynamoDBStreamsClient(awsCredentials);
-		else
-			amazonDynamoDBStreamsClient = new AmazonDynamoDBStreamsClient();
+		amazonDynamoDBStreamsClient = new AmazonDynamoDBStreamsClient(awsCredentials);
 		amazonDynamoDBStreamsClient.setRegion(Region.getRegion(Regions.US_EAST_1));
 
 		return amazonDynamoDBStreamsClient;
@@ -120,7 +117,7 @@ public class RegisterApplication {
 		if (useProxiedDevEnvironment)
 			amazonSNSClient = new AmazonSNSClient(awsCredentials, clientConfiguration);
 		else
-			amazonSNSClient = new AmazonSNSClient();
+			amazonSNSClient = new AmazonSNSClient(awsCredentials);
 		amazonSNSClient.setRegion(Region.getRegion(Regions.US_EAST_1));
 	
 		return amazonSNSClient;
