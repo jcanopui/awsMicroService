@@ -1,6 +1,6 @@
 
 server:
-  port: ${vcap.application.port:7652}
+  port: ${vcap.application.port:0}
 
 
 eureka:
