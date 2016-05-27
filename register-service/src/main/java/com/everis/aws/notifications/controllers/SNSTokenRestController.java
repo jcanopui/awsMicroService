@@ -15,7 +15,7 @@ import com.everis.aws.notifications.db.RegisterDAO;
 import com.everis.aws.notifications.entities.RegisterEntity;
 
 @RestController
-@RequestMapping("/tokens")
+@RequestMapping("/")
 class SNSTokenRestController {
 
 	@Autowired
@@ -29,12 +29,12 @@ class SNSTokenRestController {
 		return "Register-service ready!";
     }
 
-	@RequestMapping(method = RequestMethod.POST)
+	@RequestMapping(value="/tokens", method = RequestMethod.POST)
 	public AddTokenResponse registerToken(AddTokenRequest request) {
 		return register.registerToken(request.getToken(), request.getPlatform(), request.getIdentifier(), request.getProtocol());
 	}
 
-	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET)
+	@RequestMapping(value = "/tokens/{identifier}", method = RequestMethod.GET)
 	public List<RegisterEntity> getToken(@PathVariable String identifier) {
 		return registerDAO.findByIdentifier(identifier);
 	}

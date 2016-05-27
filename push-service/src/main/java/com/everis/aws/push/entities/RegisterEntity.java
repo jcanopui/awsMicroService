@@ -26,6 +26,11 @@ public class RegisterEntity {
 		this.identifier = identifier;
 		this.endpointARN = endpointARN;
 	}
+	
+	// Needed for JSON libraries (instantation)
+	public RegisterEntity() {
+		super();
+	}
 
 	@DynamoDBHashKey()
 	public String getDeviceToken() {

@@ -119,8 +119,10 @@ public class SendNotification {
 
 		PublishRequest publishRequest = new PublishRequest();
 
-		publishRequest.setTopicArn(TOPIC_ARN_FOR_PUSHES);
-		publishRequest.setTargetArn(notificationEntity.getTargetAWS());
+		if (notificationEntity.isTopic())
+			publishRequest.setTopicArn(TOPIC_ARN_FOR_PUSHES);
+		else
+			publishRequest.setTargetArn(notificationEntity.getTargetAWS());
 
 		PublishResult publishResult = publish(publishRequest, notificationEntity);
 
