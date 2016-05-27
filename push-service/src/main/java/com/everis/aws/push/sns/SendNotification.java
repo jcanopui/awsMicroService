@@ -6,18 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.Protocol;
-import com.amazonaws.auth.ClasspathPropertiesFileCredentialsProvider;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 import com.everis.aws.push.entities.NotificationEntity;
@@ -29,49 +24,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Component
 public class SendNotification {
 
-	private static AmazonSNS client = null;
+	@Autowired
+	private AmazonSNS client;
 
-	private static ClientConfiguration clientConfig = null;
+	@Autowired
+	private AmazonDynamoDB dynamoClient;
 
-	private static AmazonDynamoDBClient dynamoClient = null;
-
-	private static final String TOPIC_ARN_FOR_PUSHES = "arn:aws:sns:us-east-1:721597765533:PUSH_TO_DEVICE";
-
-	private static final ObjectMapper objectMapper = new ObjectMapper();
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Value("${everis.aws.notifications.topicForPushes}")
 	private String topicForPushes;
-
-	public SendNotification() {
-		super();
-
-		this.init();
-	}
-
-	private void init() {
-		if (dynamoClient == null) {
-			dynamoClient = new AmazonDynamoDBClient(new ClasspathPropertiesFileCredentialsProvider(),
-					getClientConfiguration());
-			dynamoClient.setRegion(Region.getRegion(Regions.US_EAST_1));
-		}
-		if (client == null) {
-			client = new AmazonSNSClient(new ClasspathPropertiesFileCredentialsProvider(), getClientConfiguration());
-			client.setRegion(Region.getRegion(Regions.US_EAST_1));
-		}
-	}
-
-	private static ClientConfiguration getClientConfiguration() {
-		if (clientConfig == null) {
-			clientConfig = new ClientConfiguration();
-			clientConfig.setProtocol(Protocol.HTTP);
-
-			clientConfig.setProxyHost("10.110.8.42");
-			clientConfig.setProxyPort(8080);
-			clientConfig.setProxyUsername("rmartita");
-			clientConfig.setProxyPassword("Rm30032016");
-		}
-		return clientConfig;
-	}
 
 	public ResponseClass broadcastNotification(String message) {
 		NotificationEntity notificationEntity = new NotificationEntity();
@@ -120,7 +83,7 @@ public class SendNotification {
 		PublishRequest publishRequest = new PublishRequest();
 
 		if (notificationEntity.isTopic())
-			publishRequest.setTopicArn(TOPIC_ARN_FOR_PUSHES);
+			publishRequest.setTopicArn(topicForPushes);
 		else
 			publishRequest.setTargetArn(notificationEntity.getTargetAWS());
 
@@ -181,7 +144,7 @@ public class SendNotification {
 		return jsonify(androidMessageMap);
 	}
 
-	public static String jsonify(Object message) {
+	public String jsonify(Object message) {
 		try {
 			return objectMapper.writeValueAsString(message);
 		} catch (Exception e) {
