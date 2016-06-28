@@ -13,8 +13,6 @@ eureka:
       defaultZone: ${vcap.services.eureka-service.credentials.uri:http://52.203.147.52:8761}/eureka/
 
 ---
-spring:
-  profiles: cloud
 eureka:
   instance:
     hostname: 52.203.147.52
